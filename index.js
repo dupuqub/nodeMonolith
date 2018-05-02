@@ -8,54 +8,70 @@ const http = require('http')
 
 //......................................................................................................................
 
-const handler = (request , response) =>
+const app = (request , response) =>
 {
   const status = 200
   const type   = {'Content-Type' : 'text/html'}
-  const page   =
-  `
-    <!doctype html>
-    <html class = "center">
+  const text   =
 
-      <head>
-        <meta charset = "utf-8">
-        <title>dunp</title>
-      </head>
+`
+<!doctype html>
 
-      <body>
-      </body>
+<html class = "center">
 
-      <style>${files.cssRoot}</style>
-      <style>${files.cssBasic}</style>
-      <style>${files.cssClass}</style>
-      <style>${files.cssId}</style>
+<head>
+  <meta charset = "utf-8">
+  <title>dunp</title>
+</head>
 
-      <script>${files.jsRoot}</script>
+<body>
+  <div id = "screen">
+</body>
 
-    </html>
-  `
+<!--.................................................................................................................-->
+
+<style>
+${writeFiles('css')}
+</style>
+
+<!--.................................................................................................................-->
+
+<script> 'use strict'
+${writeFiles('js')}
+</script>
+
+</html>
+`
 
   response.writeHead(status , type)
-  response.write(page)
+  response.write(text)
   response.end()
 }
 
 //......................................................................................................................
 
-const initialize = () => http.createServer(handler).listen(8888)
+const writeFiles = type =>
+{
+  const sum     = (a , b) => a + b
+  const content = file => files[type][file.name]
+
+  return filesToLoad[type].map(content).reduce(sum)
+}
 
 //......................................................................................................................
 
-const loadFile = (path , name) =>
+const loadFile = (path , name , type) =>
 {
   const loader = (error , contents) =>
   {
     if (error) return 'error'
 
-    files[name] = contents
-    files.loaded += 1
+    files[type][name] = contents
+    files[type].loaded += 1
 
-    const allLoaded = files.loaded === filesToLoad.length
+    const cssLoaded = files.css.loaded === filesToLoad.css.length
+    const jsLoaded  = files.js.loaded === filesToLoad.js.length
+    const allLoaded = cssLoaded && jsLoaded
 
     if (allLoaded) initialize()
   }
@@ -65,18 +81,43 @@ const loadFile = (path , name) =>
 
 //......................................................................................................................
 
-const files       = {loaded : 0}
-const filesToLoad =
-[
-  {path : './css/root.css' , name : 'cssRoot'} ,
-  {path : './css/basic.css' , name : 'cssBasic'} ,
-  {path : './css/class.css' , name : 'cssClass'} ,
-  {path : './css/id.css' , name : 'cssId'} ,
-
-  {path : './js/root.js' , name : 'jsRoot'} ,
-]
+const initialize = () => http.createServer(app).listen(8888)
 
 //......................................................................................................................
 
-filesToLoad.forEach(file => loadFile(file.path , file.name))
+const files =
+{
+  css : {loaded : 0} ,
+  js  : {loaded : 0} ,
+}
 
+const filesToLoad =
+{
+  css :
+  [
+    {path : './css/root.css'  , name : 'root'} ,
+    {path : './css/class.css' , name : 'class'} ,
+    {path : './css/id.css'    , name : 'id'} ,
+  ] ,
+
+  js :
+  [
+    {path : './js/root.js' , name : 'root'} , // must be first
+
+    {path : './js/views/main.js' , name : 'viewsMain'} ,
+
+    {path : './js/resize.js' , name : 'resize'} ,
+    {path : './js/html.js'   , name : 'html'} ,
+    {path : './js/index.js'  , name : 'index'} , // must be last
+  ] ,
+}
+
+//......................................................................................................................
+
+Object.keys(files).forEach(type =>
+{
+  filesToLoad[type].forEach(file =>
+  {
+    loadFile(file.path , file.name , type)
+  })
+})
