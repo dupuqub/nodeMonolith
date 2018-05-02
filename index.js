@@ -14,8 +14,7 @@ const app = (request , response) =>
   const type   = {'Content-Type' : 'text/html'}
   const text   =
 
-`
-<!doctype html>
+`<!doctype html>
 
 <html class = "center">
 
@@ -40,8 +39,7 @@ ${writeFiles('css')}
 ${writeFiles('js')}
 </script>
 
-</html>
-`
+</html>`
 
   response.writeHead(status , type)
   response.write(text)
