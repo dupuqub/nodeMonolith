@@ -4,7 +4,7 @@
 P.resize = () =>
 {
   const name   = P.state.view
-  const view   = P.views[name]
+  const view   = P.view
   const screen = view.screen
   const aspect = screen.aspect
 
