@@ -3,69 +3,28 @@
 
 //......................................................................................................................
 
-const fs          = require('fs')
-const http        = require('http')
-const filesToLoad = require('./js/server/filesToLoad')
-const monolith    = require('./js/server/monolith')
-const writeFiles  = require('./js/server/writeFiles')
+const fs = require('fs')
+const files = require('./server/files')
+const loaded = require('./server/loaded')
+const initialize = require('./server/initialize')
 
 //......................................................................................................................
 
-const files =
+files.types = Object.keys(files)
+
+//......................................................................................................................
+
+files.types.forEach(type =>
 {
-  css : {loaded : 0} ,
-  js  : {loaded : 0} ,
-}
-
-//......................................................................................................................
-
-const app = (request , response) =>
-{
-  const status = 200
-  const type   = {'Content-Type' : 'text/html'}
-  const css    = writeFiles(files.css , filesToLoad.css)
-  const js     = writeFiles(files.js , filesToLoad.js)
-
-  response.writeHead(status , type)
-  response.write(monolith(css , js))
-  response.end()
-}
-
-//......................................................................................................................
-
-const initialize = () => http.createServer(app).listen(8888)
-
-//......................................................................................................................
-
-const loadFile = (path , name , type) =>
-{
-  const checkLoaded = () =>
+  files[type].forEach(file =>
   {
-    const cssLoaded = files.css.loaded === filesToLoad.css.length
-    const jsLoaded  = files.js.loaded === filesToLoad.js.length
+    fs.readFile(file.path , 'utf8' , (error , contents) =>
+    {
+      if (error) return 'error'
 
-    if (cssLoaded && jsLoaded) initialize()
-  }
+      file.html = contents
 
-  const loader = (error , contents) =>
-  {
-    if (error) return 'error'
-
-    files[type][name] = contents
-    files[type].loaded += 1
-
-    checkLoaded()
-  }
-
-  fs.readFile(path , 'utf8' , loader)
-}
-
-//......................................................................................................................
-
-Object.keys(files).forEach(type =>
-{
-  filesToLoad[type].forEach(file =>
-  {
-    loadFile(file.path , file.name , type)
+      if (loaded(files)) initialize(files)
+    })
   })
 })

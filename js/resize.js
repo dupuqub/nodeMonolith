@@ -3,9 +3,7 @@
 
 P.resize = () =>
 {
-  const name   = P.state.view
-  const view   = P.view
-  const screen = view.screen
+  const screen = P.view.screen
   const aspect = screen.aspect
 
   //....................................................................................................................
@@ -38,7 +36,7 @@ P.resize = () =>
   //....................................................................................................................
   // change the body
 
-  const body = P.html.get('body')
+  const body = document.querySelector('body')
 
   body.style.width = w + 'px'
   body.style.height = h + 'px'

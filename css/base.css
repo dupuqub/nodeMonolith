@@ -3,13 +3,13 @@
 
 html
 {
-  width      : 100% ;
-  height     : 100% ;
+  width : 100% ;
+  height : 100% ;
   background : #000 ;
 }
 
 body
 {
   background : #444 ;
-  margin     : 0 ;
+  margin : 0 ;
 }
